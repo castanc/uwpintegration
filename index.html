@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>React App</title>
+  </head>
+   
+  <script type="text/javascript">
+      function pushNotifications(value) {
+          if (document.getElementById('number')) {
+              var val = document.getElementById('number').innerHTML; val = val ? val : 0;
+              document.getElementById('number').innerHTML = parseInt(val) + 1;;
+          }
+      }// number(1)
+      function isSubscribed(value) {
+          if (value === 'true') {
+              if (window.Windows) {
+                  var applicationData = Windows.Storage.ApplicationData.current;
+                  var localSettings = applicationData.localSettings;
+                  var savedChannelURI = localSettings.values["WNSChannelURI"] ? localSettings.values["WNSChannelURI"] : null;
+                  //setCookie('Subscribe', savedChannelURI, 1);
+                  //var Subscribe = getCookie('Subscribe');
+                  ;//localStorage.setItem('Subscribe', savedChannelURI);
+                  //var Subscribe = JSON.stringify( localStorage.getItem('Subscribe'));
+                  //var messageDialog = new Windows.UI.Popups.MessageDialog(Subscribe, "Alert");
+                  //messageDialog.showAsync();
+
+                  var messageDialog = new Windows.UI.Popups.MessageDialog("Thank You for Subscribe", "Alert");
+                  messageDialog.showAsync();
+              }
+              else {
+                  var messageDialog = new Windows.UI.Popups.MessageDialog("Error on the Subscribe", "Alert");
+                  messageDialog.showAsync()
+              }
+          }
+      }
+      function setCookie(name, value, days) {
+          var expires = "";
+          if (days) {
+              var date = new Date();
+              date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+              expires = "; expires=" + date.toUTCString();
+          }
+          document.cookie = name + "=" + (value || "") + expires + "; path=/";
+      }
+      function getCookie(name) {
+          var nameEQ = name + "=";
+          var ca = document.cookie.split(';');
+          for (var i = 0; i < ca.length; i++) {
+              var c = ca[i];
+              while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+              if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+          }
+          return null;
+      }
+      function eraseCookie(name) {
+          document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      }
+      //if (window.Windows)
+      //{
+      //    window.external.notify("test");
+
+      //    var messageDialog = new Windows.UI.Popups.MessageDialog("Test", "Alert");
+      //    messageDialog.showAsync();
+
+
+          
+      //    Windows.System.AppDiagnosticInfo.requestInfoAsync().then((allProc) => {
+      //        let proc = allProc[0];
+      //        let allGroups = proc.getResourceGroups();
+      //        let procGroup = allGroups[0];
+      //        let memReport = procGroup.getMemoryReport();
+      //        var msg = `   [${memReport.commitUsageLevel}] : commitUsageLevel \n` +
+      //            `   [${memReport.commitUsageLimit}] : commitUsageLimit \n` +
+      //            `   [${memReport.privateCommitUsage}] : privateCommitUsage \n` +
+      //            `   [${memReport.totalCommitUsage}] : totalCommitUsage \n`;
+
+      //        var messageDialog = new Windows.UI.Popups.MessageDialog(msg,"System info");
+      //        messageDialog.showAsync();
+
+              
+      //        console.log(memReport);
+      //        console.log(
+      //            `   [${memReport.commitUsageLevel}] : commitUsageLevel \n` +
+      //            `   [${memReport.commitUsageLimit}] : commitUsageLimit \n` +
+      //            `   [${memReport.privateCommitUsage}] : privateCommitUsage \n` +
+      //            `   [${memReport.totalCommitUsage}] : totalCommitUsage \n`
+      //        )
+      //    });
+
+
+      //    var messageDialog = new Windows.UI.Popups.MessageDialog("Before Users","before");
+      //    messageDialog.showAsync();
+
+
+
+
+      //    var users =  Windows.System.User.FindAllAsync();
+
+      //    messageDialog = new Windows.UI.Popups.MessageDialog("after users created", "after users created");
+      //    messageDialog.showAsync();
+
+
+      //    messageDialog = new Windows.UI.Popups.MessageDialog(users, "after");
+      //    messageDialog.showAsync();
+
+      //      /*
+      //    Windows.System.User.FindAllAsync().then((allUsers) => {
+      //        let user0 = allUsers[0];
+
+      //        var messageDialog = new Windows.UI.Popups.MessageDialog("Getting Users INfo", "users COunt");
+      //        messageDialog.showAsync();
+
+
+      //        messageDialog = new Windows.UI.Popups.MessageDialog(users, "after");
+      //        messageDialog.showAsync();
+      //    }
+      //   );*/
+      //}
+      //Executable = "$targetnametoken$.exe" EntryPoint = "PWA-UWP2.App"
+       
+     // window =  window.Windows
+      function callFromExternal(somedrag) {
+          if (document.getElementById('number')) {
+              document.getElementById('number').innerHTML = somedrag;
+          }
+      }
+      if (window.Windows)
+      {
+          window.external.notify("subscribed"); 
+          var messageDialog = new Windows.UI.Popups.MessageDialog(localStorage.getItem('test'), "Alert");
+          //messageDialog.showAsync();
+      }
+      localStorage.setItem('test', 'test');
+  </script>
+  <body  >
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root" ></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+
+</html>
