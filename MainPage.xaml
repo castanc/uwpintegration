@@ -1,0 +1,175 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
+using AlternatePushChannel.Library;
+using System.Threading.Tasks;
+using Windows.System.Threading;
+using Windows.UI.Core;
+using Windows.UI.ViewManagement;
+using Windows.UI.Xaml.Navigation;
+
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+
+namespace Deskhelp_UWP
+{
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public sealed partial class MainPage : Page
+    {
+        public const string PublicKey = "BAfo_vwKd3wwAxcRWBD4rECjGIdARzcYuNvLL-z0L7caaCphTsFMD7jwLMvWRO1eTsjaxKdUPWYPIy6M0y_05DQ";
+        private ThreadPoolTimer m_timer; 
+        public MainPage()
+        {
+            this.InitializeComponent();
+            //Loaded += OnLoaded;
+            renderPWAApp();
+            Window.Current.SizeChanged += OnWindowSizeChanged;//SetUpSubscription();
+        }
+        private string _subscriptionJson;
+
+        private async Task<bool> SetUpSubscription()
+        {
+            try
+            {
+                if (PushManager.IsSupported)
+                {
+                    var subscription = await PushManager.SubscribeAsync(PublicKey, "myChannel1");
+                    _subscriptionJson = subscription.ToJson();                                      
+                    var applicationData = Windows.Storage.ApplicationData.Current;
+                    var localSettings = applicationData.LocalSettings;
+                    localSettings.Values["WNSChannelURI"] = _subscriptionJson.ToString();
+
+                    return true;
+                }
+                else
+                {
+                    return false;   
+                }
+            }
+            catch (Exception ex)
+            {
+                //throw ex;
+                return false;
+            }
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            Window.Current.SizeChanged += OnWindowSizeChanged;
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            Window.Current.SizeChanged -= OnWindowSizeChanged;
+        }
+
+        void OnWindowSizeChanged(object sender, WindowSizeChangedEventArgs e)
+        {
+
+            //var view = ApplicationView.GetForCurrentView();
+            //if (view.IsFullScreenMode)
+            //{
+            //    view.ExitFullScreenMode();
+            //     // The SizeChanged event will be raised when the exit from full-screen mode is complete.
+            //}
+            //else
+            //{
+            //    if (m_timer != null)
+            //    {
+            //        m_timer.Cancel();
+            //        m_timer = null;
+            //    }
+
+            //    TimeSpan period = TimeSpan.FromSeconds(1.0);
+            //    m_timer = ThreadPoolTimer.CreateTimer(async (source) =>
+            //    {
+            //        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            //        {
+            //            float DPI = Windows.Graphics.Display.DisplayInformation.GetForCurrentView().LogicalDpi;
+            //            var desiredSize = new Windows.Foundation.Size(((float)600 * 96.0f / DPI), ((float)900 * 96.0f / DPI));
+            //            bool result = ApplicationView.GetForCurrentView().TryResizeView(desiredSize);
+            //        });
+
+            //    }, period);
+            //}
+
+            float DPI = Windows.Graphics.Display.DisplayInformation.GetForCurrentView().LogicalDpi;
+
+           // e.Handled(new Size());
+                Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
+
+            var desiredSize = new Windows.Foundation.Size(((float)600 * 96.0f / DPI), ((float)950 * 96.0f / DPI));
+
+            Windows.UI.ViewManagement.ApplicationView.PreferredLaunchViewSize = desiredSize;
+            bool result = Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().TryResizeView(desiredSize);
+
+
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            var result = ApplicationView.GetForCurrentView().TryResizeView(new Size(500, 700));
+            //Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().SetPreferredMinSize(new Size { Width = 500, Height = 700 }); 
+            System.Diagnostics.Debug.WriteLine("OnLoaded TryResizeView: " + result);
+        }
+        
+        private void renderPWAApp()
+        {
+            var applicationData = Windows.Storage.ApplicationData.Current;
+            var localSettings = applicationData.LocalSettings;
+            //localSettings.Values["WNSChannelURI"] = ""; 
+            string url = "https://deskhelptest.azurewebsites.net/ui/";
+            App.WebView = this.mywebview;
+            this.mywebview.ScriptNotify += MyWebView_ScriptNotifyAsync;
+            //await WebView.ClearTemporaryWebDataAsync();
+            this.mywebview.Navigate(new Uri(@url));
+            this.mywebview.DOMContentLoaded += DOMContentLoaded;
+        }
+
+        private void DOMContentLoaded(WebView sender, WebViewDOMContentLoadedEventArgs args)
+        {
+            App.Appload = true;
+            bool result = ApplicationView.GetForCurrentView().TryResizeView(new Size(500, 700));
+            System.Diagnostics.Debug.WriteLine("OnLoaded TryResizeView: " + result);
+        }
+
+        async void MyWebView_ScriptNotifyAsync(object sender, NotifyEventArgs e)
+        {
+            var applicationData = Windows.Storage.ApplicationData.Current;
+            var localSettings = applicationData.LocalSettings;
+            var isSubscribedCheck = localSettings.Values["WNSChannelURI"];
+                
+            if (e.Value == "subscribedo" && isSubscribedCheck == null  )
+            {
+                bool isSubscribed =  await SetUpSubscription();
+                if(isSubscribed)
+                {
+                    await this.mywebview.InvokeScriptAsync("isSubscribed", new string[] { "true" });
+                } else
+                {
+                    await this.mywebview.InvokeScriptAsync("isSubscribed", new string[] { "false" });
+                }
+                
+            }
+            
+            // Respond to the script notification.
+        }
+
+
+    }
+
+}
